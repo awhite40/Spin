@@ -1,10 +1,11 @@
-function [SearchResults, npoints, HistSearchResults] = SearchExplorer(TestData, FR, filt, Plastic, BEuler, bins)
+function [SearchResults, npoints, HistSearchResults] = SearchExplorer(TestData, FR, filt, Plastic, BEuler, bins, SearchSegEnd)
 
 
 
     index = 1;
-   
+    set(0, 'DefaultFigureWindowStyle', 'normal');
     figure(1) % scatter plot
+    
     [h, SearchResults, npoints] = MyPlotSearch(FR, filt); % filter results and scatter plot
     
     SZ = get(0,'Screensize');
@@ -69,23 +70,23 @@ function [SearchResults, npoints, HistSearchResults] = SearchExplorer(TestData, 
         mstrain = max(real(SSR.Strain));
         mstress = max(real(SSR.Stress));
         temp = [0 mstrain]; % for line plotting
-        plot(SSR.Strain, SSR.Stress,'b.', 'markersize', 10);                                                        % stress-strain data
+        plot(SSR.Strain(FR(index).segment_start:SearchSegEnd), SSR.Stress(FR(index).segment_start:SearchSegEnd),'b.', 'markersize', 10);                                                        % stress-strain data
         plot(temp,[SSR.E_ind].*temp,'color',[0.5 0.5 0.5],'LineStyle','-','linewidth',2)                            % modulus line
-        plot(temp, [SSR.E_ind].*(temp - Plastic.YS_offset),'color',[0.5 0.5 0.5],'LineStyle','--','linewidth',2);   % strain offset line
+        %plot(temp, [SSR.E_ind].*(temp - Plastic.YS_offset),'color',[0.5 0.5 0.5],'LineStyle','--','linewidth',2);   % strain offset line
         plot(SSR.Strain(FR(index).segment_start:FR(index).segment_end), SSR.Stress(FR(index).segment_start:FR(index).segment_end), 'g.','markersize', 10);          % modulus fit data
         
         % any of these can be commented out if they are needed on the plot,
-        if isnan(SSR.YieldStartEnd) == 0; % if it exists
-            plot(SSR.Yield_Strain, SSR.Yield_Strength, 'r.', 'markersize', 35);                     % yield point
-            plot(SSR.Strain(SSR.YieldStartEnd), SSR.Stress(SSR.YieldStartEnd),'r^','MarkerSize',15) % yield point data
-        end
-        if isnan(SSR.popin_YN) == 0; % if it exists
-            plot(SSR.Yield_Strain, SSR.Yield_Strength, 'r.', 'markersize', 35);                     % yield point
-        end
-        if isnan(SSR.HardeningStartEnd(2)) == 0; % 1st hardening fit if it exists
-            plot(temp, ([SSR.Hardening(1)].*temp + SSR.Hardening(2)), 'k--', 'linewidth', 2)  % int. hardening slope line
-            plot(SSR.Strain(SSR.HardeningStartEnd(1):SSR.HardeningStartEnd(2)), SSR.Stress(SSR.HardeningStartEnd(1):SSR.HardeningStartEnd(2)), 'k.','markersize', 10);  % int. hardening slope data
-        end
+%         if isnan(SSR.YieldStartEnd) == 0; % if it exists
+%             plot(SSR.Yield_Strain, SSR.Yield_Strength, 'r.', 'markersize', 35);                     % yield point
+%             plot(SSR.Strain(SSR.YieldStartEnd), SSR.Stress(SSR.YieldStartEnd),'r^','MarkerSize',15) % yield point data
+%         end
+%         if isnan(SSR.popin_YN) == 0; % if it exists
+%             plot(SSR.Yield_Strain, SSR.Yield_Strength, 'r.', 'markersize', 35);                     % yield point
+%         end
+%         if isnan(SSR.HardeningStartEnd(2)) == 0; % 1st hardening fit if it exists
+%             plot(temp, ([SSR.Hardening(1)].*temp + SSR.Hardening(2)), 'k--', 'linewidth', 2)  % int. hardening slope line
+%             plot(SSR.Strain(SSR.HardeningStartEnd(1):SSR.HardeningStartEnd(2)), SSR.Stress(SSR.HardeningStartEnd(1):SSR.HardeningStartEnd(2)), 'k.','markersize', 10);  % int. hardening slope data
+%         end
 %         if isnan(SSR.Hardening(3)) == 0; % 2nd hardening fit if it exists
 %             plot(temp, ([SSR.Hardening(3)].*temp + SSR.Hardening(4)), 'm--', 'linewidth', 2) % 2nd hardening slope line    
 %             plot(SSR.Strain(SSR.HardeningStartEnd(2):SSR.HardeningStartEnd(3)), SSR.Stress(SSR.HardeningStartEnd(2):SSR.HardeningStartEnd(3)), 'm.','markersize', 10);  % 2nd hardening slope data
@@ -95,11 +96,11 @@ function [SearchResults, npoints, HistSearchResults] = SearchExplorer(TestData, 
         ylabel ('Indentation Stress [GPa]','fontsize',13)
         
         % legend entries are not complete
-        legend('Stress-Strain','Modulus Line', '0.2% Offset', 'Modulus Fit Data', 'Location', 'SOUTHEAST');
+        legend('Stress-Strain','Modulus Line', 'Modulus Fit Data', 'Location', 'SOUTHEAST');
 
         %% use for manual scaling
-        mstrain = 0.05;
-        % mstress = 3.0;
+        mstrain = 0.1;
+        %mstress = 10.0;
         
         xlim([0 mstrain + mstrain/20])
         ylim([0 mstress + mstress/20])
@@ -137,7 +138,8 @@ function [SearchResults, npoints, HistSearchResults] = SearchExplorer(TestData, 
  
         subplot(2,4,4) % Zero Point Fit
         Y = Load - 2/3.*S.*Displ;
-        plot(S(1:segment_end+50), Y(1:segment_end+50),'b.');
+        %plot(S(1:segment_end+50), Y(1:segment_end+50),'b.');
+        plot(S(1:end), Y(1:end),'b.');
         hold on
         plot(S(segment_start:segment_end), Y(segment_start:segment_end),'g*');
         legend('Raw Data','0 Pt. Data');
@@ -148,7 +150,8 @@ function [SearchResults, npoints, HistSearchResults] = SearchExplorer(TestData, 
         subplot(2,4,7) % Modulus Fit
         modulus_start = FR(index).modulus_start;
         P23 = (SSR.P_new).^(2/3);
-        plot(P23(modulus_start:segment_end+50), SSR.h_new(modulus_start:segment_end+50), 'b.')
+        %plot(P23(modulus_start:segment_end+50), SSR.h_new(modulus_start:segment_end+50), 'b.')
+        plot(P23(modulus_start:end), SSR.h_new(modulus_start:end), 'b.')
         hold on
         plot(P23(modulus_start:segment_end), SSR.h_new(modulus_start:segment_end), 'g.')
         xlabel('P 2/3')
@@ -157,15 +160,17 @@ function [SearchResults, npoints, HistSearchResults] = SearchExplorer(TestData, 
         title('Modulus Fit')
         hold off
         
+        
         subplot(2,4,8) % contact radius vs. strain
-        plot(SSR.Strain, SSR.contact_radius, 'b.')
+        plot(SSR.Strain, SSR.contact_radius/1000, 'b.')
         hold on
-        plot(SSR.Strain(modulus_start:segment_end), SSR.contact_radius(modulus_start:segment_end), 'g.')
-        xlim([0, mstrain + mstrain/20]);
+        plot(SSR.Strain(modulus_start:segment_end), SSR.contact_radius(modulus_start:segment_end)/1000, 'g.')
+        xlim([0, (mstrain + mstrain/20)]);
         YL = ylim;
-        ylim([0 YL(2)]);
+        ylim([0 TestData.IndenterRadius/10000]);
+        
         xlabel('Strain');
-        ylabel('Contact Radius / nm');
+        ylabel('Contact Radius / um');
         legend('Data','Elastic','Location','SouthEast');
         title('Strain Vs. Contact Radius')
         grid on

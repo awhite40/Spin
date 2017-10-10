@@ -70,6 +70,8 @@ for ii = 1:m
             GoodR = FR([FR.modulus_start] >= fil{ii,2}(1) & [FR.modulus_start] <= fil{ii,2}(2));
         case 'SegStart'         % position of first data point in the zero point regression
             GoodR = FR([FR.segment_start] >= fil{ii,2}(1) & [FR.segment_start] <= fil{ii,2}(2));
+        case 'SegEnd'         % position of first data point in the zero point regression
+            GoodR = FR([FR.segment_end] >= fil{ii,2}(1) & [FR.segment_end] <= fil{ii,2}(2));
 
     end
     numResults(ii+1) = length(GoodR);

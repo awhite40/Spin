@@ -98,12 +98,17 @@ function [analysis, success] = NIAnalyzeSearch(TestData, segment_start, segment_
     P_new_23 = P_new_fit.^(2/3);
 
     p = mypolyfit(P_new_23, h_new_fit, 1); % modulus regression
-    
+    addpath 'C:\Users\Alicia Rossi\Documents\GitHub\polyfitZero-1.3'
+    p0 = polyfitZero(P_new_23, h_new_fit,1);
     if (p(1) <= 0) % if the slope is negative, E_star is imaginary
         return;
     end
     
-    Fit2.slope = p(1);
+    if (p0(1) <= 0) % if the slope is negative, E_star is imaginary
+        return;
+    end
+    
+    Fit2.slope = p0(1);
     Fit2.y_intercept = p(2);
     % Evaluate Fit assuming y_intercept is zero. Fit2 parameters then emphasize data
     % which is linear and goes through the origin.

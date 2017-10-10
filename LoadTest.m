@@ -21,7 +21,7 @@ end
 % Finds where unloading starts
 HoldSegmentII = size(num, 1); 
 for ii=1:size(txt,1) 
-    if strcmpi(txt(ii), 'Hold Segment Type') == 1 % e.g., 'End Of Loading Marker' the exact text depends on the version of NanoSuite
+    if strcmpi(txt(ii), 'End Of Loading Marker') == 1 % e.g., 'Hold Segment Type' the exact text depends on the version of NanoSuite
         HoldSegmentII=ii-2; 
         break; 
     end
