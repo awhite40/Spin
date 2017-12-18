@@ -1,4 +1,4 @@
-function [analysis, success] = NIAnalyzeSearch(TestData, segment_start, segment_end)
+function [analysis, success] = NIAnalyzeSearch(TestData, segment_start, segment_end,SS_fit)
 
     success = 0; % if success = 0, the trial is not recorded
     
@@ -98,7 +98,6 @@ function [analysis, success] = NIAnalyzeSearch(TestData, segment_start, segment_
     P_new_23 = P_new_fit.^(2/3);
 
     p = mypolyfit(P_new_23, h_new_fit, 1); % modulus regression
-    addpath 'C:\Users\Alicia Rossi\Documents\GitHub\polyfitZero-1.3'
     p0 = polyfitZero(P_new_23, h_new_fit,1);
     if (p(1) <= 0) % if the slope is negative, E_star is imaginary
         return;
@@ -144,6 +143,10 @@ function [analysis, success] = NIAnalyzeSearch(TestData, segment_start, segment_
     stress_E = Stress(modulus_start:segment_end); % actual elastic stress data
     strain_E = Strain(modulus_start:segment_end);
     p = mypolyfit(strain_E, stress_E, 1);
+    if SS_fit == 1
+        analysis.E_sample = p(1);
+    end
+  
     % Evaluate Fit assuming y_intercept is zero. Fit3 parameters then emphasize data
     % which is linear and goes through the origin.
     Output = polyval([p(1) 0], strain_E);

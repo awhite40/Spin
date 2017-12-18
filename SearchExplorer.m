@@ -1,4 +1,4 @@
-function [SearchResults, npoints, HistSearchResults] = SearchExplorer(TestData, FR, filt, Plastic, BEuler, bins, SearchSegEnd)
+function [SearchResults, npoints, HistSearchResults] = SearchExplorer(TestData, FR, filt, Plastic, BEuler, bins, SearchSegEnd,SS_fit)
 
 
 
@@ -60,7 +60,7 @@ function [SearchResults, npoints, HistSearchResults] = SearchExplorer(TestData, 
     end
 %% plot the stress-strain curve and 4 other plots
     function plotss(a,b) % plots the stress-strain curve for the analysis selcted with the cursor
-        SSR = CalcStressStrainWithYield(TestData, FR(index), Plastic);
+        SSR = CalcStressStrainWithYield(TestData, FR(index), Plastic, SS_fit);
         
         figure()
         set(gcf, 'Position', SZ) % make fullscreen
@@ -72,14 +72,14 @@ function [SearchResults, npoints, HistSearchResults] = SearchExplorer(TestData, 
         temp = [0 mstrain]; % for line plotting
         plot(SSR.Strain(FR(index).segment_start:SearchSegEnd), SSR.Stress(FR(index).segment_start:SearchSegEnd),'b.', 'markersize', 10);                                                        % stress-strain data
         plot(temp,[SSR.E_ind].*temp,'color',[0.5 0.5 0.5],'LineStyle','-','linewidth',2)                            % modulus line
-        %plot(temp, [SSR.E_ind].*(temp - Plastic.YS_offset),'color',[0.5 0.5 0.5],'LineStyle','--','linewidth',2);   % strain offset line
+        plot(temp, [SSR.E_ind].*(temp - Plastic.YS_offset),'color',[0.5 0.5 0.5],'LineStyle','--','linewidth',2);   % strain offset line
         plot(SSR.Strain(FR(index).segment_start:FR(index).segment_end), SSR.Stress(FR(index).segment_start:FR(index).segment_end), 'g.','markersize', 10);          % modulus fit data
         
         % any of these can be commented out if they are needed on the plot,
-%         if isnan(SSR.YieldStartEnd) == 0; % if it exists
-%             plot(SSR.Yield_Strain, SSR.Yield_Strength, 'r.', 'markersize', 35);                     % yield point
-%             plot(SSR.Strain(SSR.YieldStartEnd), SSR.Stress(SSR.YieldStartEnd),'r^','MarkerSize',15) % yield point data
-%         end
+        if isnan(SSR.YieldStartEnd) == 0; % if it exists
+            plot(SSR.Yield_Strain, SSR.Yield_Strength, 'r.', 'markersize', 35);                     % yield point
+            plot(SSR.Strain(SSR.YieldStartEnd), SSR.Stress(SSR.YieldStartEnd),'r^','MarkerSize',15) % yield point data
+        end
 %         if isnan(SSR.popin_YN) == 0; % if it exists
 %             plot(SSR.Yield_Strain, SSR.Yield_Strength, 'r.', 'markersize', 35);                     % yield point
 %         end
@@ -179,7 +179,7 @@ function [SearchResults, npoints, HistSearchResults] = SearchExplorer(TestData, 
     end
 %% save the FitResult and stress-strain analysis
     function savess(a,b) % save the data for the analysis selcted with the cursor
-        StressStrain = CalcStressStrainWithYield(TestData, FR(index), Plastic);
+        StressStrain = CalcStressStrainWithYield(TestData, FR(index), Plastic,SS_fit);
         sht.StressStrainResult = StressStrain;
         sht.FitResult = FR(index);
         sht.Index = index;
@@ -189,7 +189,7 @@ function [SearchResults, npoints, HistSearchResults] = SearchExplorer(TestData, 
 % 1 to 1 correpondence with SearchResults
     function savessall(a,b)
         for ii = 1:npoints(end);
-            [StressStrainSearchResults(ii)] = CalcStressStrainWithYield(TestData, SearchResults(ii), Plastic);
+            [StressStrainSearchResults(ii)] = CalcStressStrainWithYield(TestData, SearchResults(ii), Plastic,SS_fit);
         end
         sht = StressStrainSearchResults;
         assignin('base', 'Stress_Strain_Search_Results', sht);

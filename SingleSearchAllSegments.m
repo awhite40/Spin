@@ -1,4 +1,4 @@
-function [FitResults] = SingleSearchAllSegments(seg_sizes, TestData, SearchSegEnd)
+function [FitResults] = SingleSearchAllSegments(seg_sizes, TestData, SearchSegEnd,SS_fit)
 AnalysisCell = cell(10,1);
 count = 1;
 SSegEnd = zeros(length(seg_sizes),1);
@@ -7,7 +7,7 @@ for ii=1:length(seg_sizes) % iterate of all segment sizes
     for j=TestData.StiffnessSegmentStart:SSegEnd(ii) % iterate through the data
         start = j;
         stop = start + seg_sizes(ii);
-        [analysis, success]= NIAnalyzeSearch(TestData, start, stop);
+        [analysis, success]= NIAnalyzeSearch(TestData, start, stop, SS_fit);
         if success==1
             AnalysisCell{count,1}=analysis;
             count = count + 1;

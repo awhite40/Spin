@@ -1,5 +1,5 @@
 
-function StressStrainResults = CalcStressStrainWithYield(TestData, SR, Plastic)
+function StressStrainResults = CalcStressStrainWithYield(TestData, SR, Plastic,SS_fit)
 
     StressStrainResults.contact_radius = NaN;       % contact radius, nm
     StressStrainResults.Stress = NaN;               % indentation stress, GPa
@@ -52,8 +52,12 @@ function StressStrainResults = CalcStressStrainWithYield(TestData, SR, Plastic)
     h_sample = h_new - hi;                      % sample displacement corrected for the elastic displacement of the indenter tip
     StressStrainResults.h_sample = h_sample;    % used for calculation of indentation strain
     
-    E_ind = (1/E_star - (1-vi^2)/Ei)^-1;        % indentation modulus (GPa)
-    StressStrainResults.E_ind = E_ind;
+    E_ind = (1/E_star - (1-vi^2)/Ei)^-1;% indentation modulus (GPa)
+    if SS_fit ==1
+        StressStrainResults.E_ind = SR.E_sample;
+    else
+        StressStrainResults.E_ind = E_ind;
+    end
     Stress = P_new./(pi*a.^2)*1e6;  % indentation stress, GPa
     Strain = 4/(3*pi)*h_sample./a; % indentation strain, this is strain corrected for the indenter tip displacement
     StressStrainResults.Stress = Stress;
